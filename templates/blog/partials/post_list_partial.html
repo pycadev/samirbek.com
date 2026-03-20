@@ -1,0 +1,50 @@
+{% for post in posts %}
+<article class="flex flex-col md:flex-row gap-8 items-start animate-fade-in">
+    <div class="w-full md:w-1/3 shrink-0">
+        {% if post.featured_image %}
+        <img src="{{ post.featured_image.url }}" alt="{{ post.title }}" class="w-full aspect-video rounded-xl object-cover">
+        {% else %}
+        <div class="w-full aspect-video bg-gray-100 dark:bg-gray-800 rounded-xl flex items-center justify-center">
+            <span class="text-gray-400 font-mono text-sm">{{ post.category.name }}</span>
+        </div>
+        {% endif %}
+    </div>
+    <div class="flex-grow relative bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-3xl p-8 hover:shadow-xl transition-all group overflow-hidden">
+        <div class="flex items-center space-x-2 text-blue-500 font-bold uppercase tracking-widest text-xs mb-4">
+            <span>{{ post.category.name }}</span>
+            <span class="text-gray-300">•</span>
+            <span class="text-gray-500">{{ post.created_at|date:"F d, Y" }}</span>
+        </div>
+        
+        <h2 class="text-2xl font-extrabold mb-4 group-hover:text-blue-500 transition-colors tracking-tight">
+            <a href="{{ post.get_absolute_url }}" class="after:absolute after:inset-0">
+                {{ post.title }}
+            </a>
+        </h2>
+        
+        <p class="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
+            {{ post.summary|truncatechars:180 }}
+        </p>
+        <div class="flex gap-2">
+            {% for tag in post.tags.all %}
+            <span class="px-2 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-xs text-gray-500 lowercase">#{{ tag.name|slugify }}</span>
+            {% endfor %}
+        </div>
+    </div>
+</article>
+{% empty %}
+<div class="text-center py-20 text-gray-500">
+    Maqolalar topilmadi.
+</div>
+{% endfor %}
+
+{% if page_obj.has_next %}
+<div class="text-center py-12">
+    <button class="px-6 py-2 border border-gray-200 dark:border-gray-800 rounded-lg hover:border-blue-500 transition-colors"
+            hx-get="{% url 'blog:blog_list' %}?page={{ page_obj.next_page_number }}"
+            hx-target="#post-list"
+            hx-swap="beforeend">
+        Yana yuklash...
+    </button>
+</div>
+{% endif %}

@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block title %}
+    {% if object %}Tahrirlash: {{ object.title }}{% else %}Yangi Maqola{% endif %} | Samirbek
+{% endblock %}
+
+{% block extra_head %}
+<!-- Toast UI Editor (Offline Ready) -->
+<link rel="stylesheet" href="{% static 'vendor/css/toastui-editor.min.css' %}" />
+<link rel="stylesheet" href="{% static 'vendor/css/toastui-editor-dark.min.css' %}">
+<script src="{% static 'vendor/js/toastui-editor-all.min.js' %}"></script>
+
+<style>
+    /* Premium Editor Styles */
+    .toastui-editor-defaultUI {
+        border-radius: 1.5rem !important;
+        border: 2px solid #f1f5f9 !important;
+        overflow: hidden !important;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+    }
+    .dark .toastui-editor-defaultUI {
+        border-color: #1e293b !important;
+        background-color: #0f172a !important;
+    }
+    .toastui-editor-toolbar {
+        background-color: #f8fafc !important;
+        border-bottom: 1px solid #f1f5f9 !important;
+        padding: 10px !important;
+    }
+    .dark .toastui-editor-toolbar {
+        background-color: #1e293b !important;
+        border-color: #334155 !important;
+    }
+    .toastui-editor-main {
+        background-color: white !important;
+    }
+    .dark .toastui-editor-main {
+        background-color: #0f172a !important;
+    }
+    .toastui-editor-ww-container {
+        padding: 20px !important;
+    }
+    /* Senior Distraction-free look */
+    .toastui-editor-mode-switch {
+        border-top: 1px solid #f1f5f9 !important;
+    }
+    .dark .toastui-editor-mode-switch {
+        border-color: #334155 !important;
+        background-color: #1e293b !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4">
+    <header class="mb-12">
+        <div class="flex items-center space-x-4 mb-4">
+            <a href="{% url 'blog:blog_list' %}" class="p-2 bg-gray-100 dark:bg-gray-800 rounded-full hover:bg-gray-200 transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            </a>
+            <h1 class="text-3xl md:text-5xl font-black tracking-tight">
+                {% if object %}Maqolani Tahrirlash{% else %}Yangi Maqola{% endif %}
+            </h1>
+        </div>
+        <p class="text-gray-500 text-lg">Word kabi oson, Senior darajadagi tajriba.</p>
+    </header>
+
+    <form id="post-form" method="post" enctype="multipart/form-data" class="space-y-12 pb-24">
+        {% csrf_token %}
+        
+        <!-- Stealth Fields -->
+        <input type="hidden" name="content" id="id_content">
+        
+        <!-- Header Info -->
+        <div class="space-y-8 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-8 rounded-3xl shadow-sm">
+            {{ form.title }}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                    <label class="block text-xs font-black text-blue-500 uppercase tracking-widest mb-3">Kategoriya</label>
+                    {{ form.category }}
+                </div>
+                <div>
+                    <label class="block text-xs font-black text-blue-500 uppercase tracking-widest mb-3">Teglar</label>
+                    {{ form.tags }}
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs font-black text-blue-500 uppercase tracking-widest mb-3">Qisqacha mazmun</label>
+                {{ form.summary }}
+            </div>
+        </div>
+
+        <!-- The Editor -->
+        <div class="space-y-4">
+            <label class="block text-xs font-black text-blue-500 uppercase tracking-widest ml-4">Maqola Matni (WYSIWYG)</label>
+            <div id="editor-container"></div>
+        </div>
+
+        <!-- Media & Settings -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-2 p-8 bg-gray-50 dark:bg-gray-800/30 rounded-3xl border-2 border-dashed border-gray-200 dark:border-gray-700">
+                <label class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-4">Muqova rasmi</label>
+                {{ form.featured_image }}
+            </div>
+            <div class="p-8 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-3xl flex flex-col justify-center space-y-4">
+                <label class="flex items-center space-x-3 cursor-pointer p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-xl transition-colors">
+                    {{ form.is_published }}
+                    <span class="font-bold text-sm">Nashr etish</span>
+                </label>
+                <label class="flex items-center space-x-3 cursor-pointer p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-xl transition-colors text-blue-500">
+                    {{ form.featured }}
+                    <span class="font-bold text-sm">Tanlangan (Hero)</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex items-center gap-6 sticky bottom-8 z-40 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl p-4 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-2xl">
+            <button type="submit" class="flex-grow md:flex-none px-12 py-5 bg-blue-600 text-white font-black rounded-2xl hover:bg-blue-700 transition-all shadow-xl shadow-blue-500/30 hover:-translate-y-1">
+                {% if object %}O'zgarishlarni saqlash{% else %}E'lon qilish{% endif %}
+            </button>
+            <a href="{% url 'blog:blog_list' %}" class="px-8 py-5 text-gray-500 font-bold hover:text-red-500 transition-colors">
+                Bekor qilish
+            </a>
+        </div>
+    </form>
+</div>
+
+<script>
+    const isDark = document.documentElement.classList.contains('dark');
+    
+    // Initialize Toast UI Editor
+    const editor = new toastui.Editor({
+        el: document.querySelector('#editor-container'),
+        height: '600px',
+        initialEditType: 'wysiwyg', // Start in Word-like mode
+        previewStyle: 'vertical',
+        theme: isDark ? 'dark' : 'default',
+        placeholder: 'Maqolangizni bu yerda yozishni boshlang...',
+        initialValue: `{{ object.content|safe|default:'' }}`,
+        toolbarItems: [
+            ['heading', 'bold', 'italic', 'strike'],
+            ['hr', 'quote'],
+            ['ul', 'ol', 'task', 'indent', 'outdent'],
+            ['table', 'image', 'link'],
+            ['code', 'codeblock'],
+            ['scrollSync'],
+        ]
+    });
+
+    // Handle Form submission
+    const form = document.querySelector('#post-form');
+    form.addEventListener('submit', function(e) {
+        // Get content as Markdown
+        const content = editor.getMarkdown();
+        document.querySelector('#id_content').value = content;
+    });
+
+    // Dark mode listener for theme sync
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.attributeName === 'class') {
+                const nowDark = document.documentElement.classList.contains('dark');
+                // Note: ToastUI Editor theme can't be changed dynamically easily, 
+                // but we can adjust CSS-wise if needed or notify user to refresh.
+            }
+        });
+    });
+    observer.observe(document.documentElement, { attributes: true });
+</script>
+{% endblock %}

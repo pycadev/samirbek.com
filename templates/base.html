@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="uz" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Samirbek | Fullstack{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}Backend muhandisi va PyGen AI asoschisi Samirbekning shaxsiy blogi.{% endblock %}">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{% static 'logo/logo.png' %}">
+    
+    <!-- Tailwind (Offline Ready) -->
+    <script src="{% static 'vendor/js/tailwind.js' %}"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        dark: '#0f172a',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                }
+            }
+        }
+    </script>
+    
+    <!-- HTMX (Offline Ready) -->
+    <script src="{% static 'vendor/js/htmx.min.js' %}"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/index.css' %}">
+    
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="min-h-screen flex flex-col antialiased" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+    
+    <!-- Dark Mode Script -->
+    <script>
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+
+    <header class="sticky top-0 z-50 glass border-b border-gray-200 dark:border-gray-800">
+        <nav class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="/" class="flex items-center space-x-3 text-2xl font-bold tracking-tight hover:text-blue-500 transition-colors">
+                <img src="{% static 'logo/logo.png' %}" alt="Logo" class="w-10 h-10 rounded-full border-2 border-blue-500 object-cover">
+                <span>samirbek<span class="text-blue-500">'s blog</span></span>
+            </a>
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="{% url 'blog:blog_list' %}" class="hover:text-blue-500 transition-colors">Blog</a>
+                <a href="{% url 'blog:project_list' %}" class="hover:text-blue-500 transition-colors">Loyihalar</a>
+                
+                <!-- IDE Link (Senior UX) -->
+                <button onclick="openIDE()" class="text-gray-500 hover:text-blue-500 transition-colors flex items-center gap-1.5 text-sm font-medium">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+                    <span>Lab</span>
+                </button>
+                
+                <!-- Search Trigger (Senior UX) -->
+                <button id="search-trigger" class="px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-full text-gray-500 hover:text-blue-500 transition-all flex items-center gap-3 text-sm font-medium border border-transparent hover:border-blue-100 dark:hover:border-blue-900/30">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    <span>Qidiruv...</span>
+                    <kbd class="hidden md:inline-flex px-1.5 py-0.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-md text-[10px] text-gray-400 font-bold leading-none uppercase">Ctrl K</kbd>
+                </button>
+
+                <button id="theme-toggle" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                    <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                    <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+                </button>
+            </div>
+            <!-- Mobile Menu Button (simplified) -->
+            <div class="md:hidden flex items-center space-x-4">
+                <button id="theme-toggle-mobile" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                    <!-- Reuse the same dark/light logic elsewhere -->
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 5a7 7 0 100 14 7 7 0 000-14z"/></svg>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-6 py-12 flex-grow">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="border-t border-gray-200 dark:border-gray-800 py-8">
+        <div class="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center text-sm text-gray-500">
+            <p>&copy; 2026 Samirbek. Barcha huquqlar himoyalangan.</p>
+            <div class="flex space-x-6 mt-4 md:mt-0">
+                <a href="#" class="hover:text-blue-500">GitHub</a>
+                <a href="#" class="hover:text-blue-500">LinkedIn</a>
+                <a href="#" class="hover:text-blue-500">Telegram</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        var themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+        var themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            themeToggleLightIcon.classList.remove('hidden');
+        } else {
+            themeToggleDarkIcon.classList.remove('hidden');
+        }
+
+        var themeToggleBtn = document.getElementById('theme-toggle');
+
+        themeToggleBtn.addEventListener('click', function() {
+            themeToggleDarkIcon.classList.toggle('hidden');
+            themeToggleLightIcon.classList.toggle('hidden');
+
+            if (localStorage.getItem('color-theme')) {
+                if (localStorage.getItem('color-theme') === 'light') {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('color-theme', 'dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('color-theme', 'light');
+                }
+            } else {
+                if (document.documentElement.classList.contains('dark')) {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('color-theme', 'light');
+                } else {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('color-theme', 'dark');
+                }
+            }
+        });
+    </script>
+    <!-- Performance & Health Widget (Senior Level) -->
+    <div id="perf-widget" class="fixed bottom-4 left-4 z-50 flex items-center gap-2 px-3 py-1.5 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md rounded-full border border-gray-100 dark:border-gray-800 shadow-lg text-[10px] font-bold text-gray-500 transition-all hover:scale-105 cursor-help" title="System Health & Performance">
+        <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+        <span id="load-time">0ms</span>
+        <span class="text-gray-300 dark:text-gray-700">|</span>
+        <span class="text-blue-500 uppercase tracking-widest">Stable</span>
+    </div>
+
+    <!-- Command Palette (Ctrl+K) -->
+    <div id="command-palette" class="fixed inset-0 z-[60] hidden bg-gray-900/40 backdrop-blur-sm p-4 md:p-[10vh]">
+        <div class="max-w-2xl mx-auto bg-white dark:bg-gray-900 rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 overflow-hidden">
+            <div class="p-6 border-b border-gray-100 dark:border-gray-800 flex items-center gap-4">
+                <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                <input type="text" id="command-input" placeholder="Nimani qidiramiz? (Maqolalar, Loyihalar, Dark mode...)" class="w-full bg-transparent border-none focus:ring-0 text-lg dark:text-white placeholder-gray-400">
+                <kbd class="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded-lg text-[10px] text-gray-400">ESC</kbd>
+            </div>
+            <div id="command-results" class="max-h-[50vh] overflow-y-auto p-4 space-y-2">
+                <!-- Results dynamic -->
+                <div class="text-[11px] text-gray-400 uppercase tracking-widest font-bold px-4 pt-4 mb-2">Tezkor amallar</div>
+                <button onclick="toggleDarkMode()" class="w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-2xl transition-colors text-left group">
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Offline Python IDE (Ctrl+Shift+P) (Senior Level - Light Mode) -->
+    <div id="ide-overlay" class="fixed inset-0 z-[70] hidden bg-white/60 backdrop-blur-2xl flex flex-col selection:bg-blue-100">
+        <!-- IDE Header -->
+        <div class="flex items-center justify-between px-6 py-3 border-b border-gray-100 bg-white/80">
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center shadow-xl shadow-blue-500/20">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+                </div>
+                <div>
+                    <h2 class="text-base font-black text-gray-900 tracking-tight">Samirbek Lab <span class="text-blue-600">v2.0</span></h2>
+                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em]">High Performance IDE</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="runIDECode()" id="run-btn" class="flex items-center gap-2 px-8 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl text-xs font-bold transition-all shadow-xl shadow-blue-500/30 hover:scale-105 active:scale-95">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
+                    RUN CODE (F5)
+                </button>
+                <button onclick="stopIDE()" class="flex items-center gap-2 px-4 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-2xl text-xs font-bold transition-all">
+                    STOP
+                </button>
+                <button onclick="clearIDE()" class="p-2.5 text-gray-400 hover:text-gray-900 transition-colors bg-gray-50 rounded-2xl border border-gray-100" title="Tozalash">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- IDE Body -->
+        <div class="flex-grow flex flex-col md:flex-row overflow-hidden">
+            <!-- Editor Pane -->
+            <div id="monaco-container" class="flex-grow overflow-hidden bg-white"></div>
+            
+            <!-- Output Pane -->
+            <div class="w-full md:w-[450px] flex flex-col bg-gray-50/50 border-l border-gray-100">
+                <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-white/50">
+                    <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">System Console</span>
+                    <span id="ide-status" class="flex items-center gap-2 text-[10px] font-bold text-gray-500">
+                        <span class="w-2 h-2 rounded-full bg-gray-300"></span>
+                        Ready
+                    </span>
+                </div>
+                <div id="ide-output" class="flex-grow p-8 font-mono text-[13px] text-gray-700 overflow-y-auto whitespace-pre-wrap leading-relaxed">
+<span class="text-blue-500 font-bold">>>> Samirbek Lab'ga xush kelibsiz!</span>
+Kodingiz natijasi bu yerda paydo bo'ladi...
+                </div>
+                <!-- Mini Stats -->
+                <div class="p-4 bg-white border-t border-gray-100 flex justify-around text-[9px] font-bold text-gray-400 uppercase tracking-tighter">
+                    <div class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-green-500"></span> Python 3.11</div>
+                    <div class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> Offline StdLib</div>
+                    <div class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span> WASM Engine</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vendor Assets -->
+    <script src="{% static 'vendor/monaco/stackframe.js' %}"></script>
+    <script src="{% static 'vendor/monaco/loader.js' %}"></script>
+    <script src="{% static 'vendor/pyodide/pyodide.js' %}"></script>
+
+    <script>
+        // Performance Timing
+        window.addEventListener('load', () => {
+            const cookies = document.cookie.split('; ');
+            const perfCookie = cookies.find(row => row.startsWith('perf_time='));
+            if (perfCookie) {
+                const time = perfCookie.split('=')[1];
+                document.getElementById('load-time').innerText = time + 'ms';
+            }
+        });
+
+        // Command Palette Logic
+        const palette = document.getElementById('command-palette');
+        const cmdInput = document.getElementById('command-input');
+        const cmdResults = document.getElementById('command-results');
+
+        async function updateSearch(query) {
+            if (query.length < 2) return;
+            const res = await fetch(`/api/search/?q=${encodeURIComponent(query)}`);
+            const data = await res.json();
+            
+            // Keep "Tezkor amallar" but add search results above it
+            let html = '<div class="text-[11px] text-gray-400 uppercase tracking-widest font-bold px-4 pt-4 mb-2">Qidiruv natijalari</div>';
+            data.results.forEach(item => {
+                html += `
+                <a href="${item.url}" class="w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-2xl transition-colors text-left group">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 bg-gray-100 dark:bg-gray-800 rounded-xl flex items-center justify-center text-lg">${item.icon}</div>
+                        <div>
+                            <div class="font-bold text-sm">${item.title}</div>
+                            <div class="text-xs text-gray-500">${item.type}</div>
+                        </div>
+                    </div>
+                </a>`;
+            });
+            
+            // Add static actions
+            html += '<div class="text-[11px] text-gray-400 uppercase tracking-widest font-bold px-4 pt-4 mb-2">Tezkor amallar</div>';
+            html += `
+            <button onclick="location.reload()" class="w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-2xl transition-colors text-left group">
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-center text-blue-500 font-bold">🌓</div>
+                    <div>
+                        <div class="font-bold text-sm">Mavzuni yangilash</div>
+                        <div class="text-xs text-gray-500">Sahifani qayta yuklash</div>
+                    </div>
+                </div>
+            </button>`;
+            
+            cmdResults.innerHTML = html;
+        }
+
+        let searchTimeout;
+        cmdInput.addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => updateSearch(e.target.value), 200);
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                palette.classList.remove('hidden');
+                cmdInput.focus();
+            }
+            if (e.key === 'Escape') {
+                palette.classList.add('hidden');
+            }
+        });
+
+        palette.addEventListener('click', (e) => {
+            if (e.target === palette) palette.classList.add('hidden');
+        });
+
+        const searchTrigger = document.getElementById('search-trigger');
+        if (searchTrigger) {
+            searchTrigger.addEventListener('click', () => {
+                palette.classList.remove('hidden');
+                cmdInput.focus();
+            });
+        }
+
+        // IDE Logic (Senior v2.3)
+        let editor;
+        let pyInstance;
+        let isRunning = false;
+
+        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' }});
+
+        function openIDE() {
+            document.getElementById('ide-overlay').classList.remove('hidden');
+            if (!editor) {
+                require(['vs/editor/editor.main'], function() {
+                    editor = monaco.editor.create(document.getElementById('monaco-container'), {
+                        value: localStorage.getItem('ide_code') || "print('Salom, Samirbek Lab!')\n# Python kodingizni yozing...",
+                        language: 'python', 
+                        theme: 'vs', 
+                        automaticLayout: true, 
+                        fontSize: 14,
+                        fontFamily: 'JetBrains Mono', 
+                        minimap: { enabled: false }, 
+                        roundedSelection: true,
+                        scrollBeyondLastLine: false, 
+                        lineNumbers: 'on',
+                        renderLineHighlight: 'all',
+                        padding: { top: 20 }
+                    });
+                    editor.onDidChangeModelContent(() => localStorage.setItem('ide_code', editor.getValue()));
+                });
+                initPyodide();
+            }
+        }
+
+        async function initPyodide() {
+            const status = document.getElementById('ide-status');
+            status.innerHTML = '<span class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></span> Loading Runtime...';
+            try {
+                pyInstance = await loadPyodide({ indexURL: "/static/vendor/pyodide/" });
+                
+                // --- Ultimate Senior Input Fix (v2.4) ---
+                await pyInstance.runPythonAsync(`
+                    import sys, io, builtins
+                    from js import prompt
+
+                    def senior_input(p=""):
+                        res = prompt(p if p else "INPUT:")
+                        if res is None: raise EOFError("User cancelled")
+                        return res
+
+                    builtins.input = senior_input
+                    sys.stdout = io.StringIO()
+                    sys.stderr = io.StringIO()
+                `);
+                
+                status.innerHTML = '<span class="w-2 h-2 rounded-full bg-green-500"></span> Engine Ready';
+            } catch (err) {
+                status.innerHTML = '<span class="w-2 h-2 rounded-full bg-red-500"></span> Error: ' + err.message;
+            }
+        }
+
+        async function runIDECode() {
+            if (isRunning) return;
+            const output = document.getElementById('ide-output');
+            const runBtn = document.getElementById('run-btn');
+            const status = document.getElementById('ide-status');
+
+            if (!pyInstance) {
+                output.innerText = "Error: Engine yuklanmagan. Iltimos kuting...";
+                return;
+            }
+
+            const code = editor.getValue();
+            output.innerHTML = '<span class="text-blue-500 font-bold">>>> Dastur ishga tushdi...</span>\n';
+            isRunning = true;
+            runBtn.disabled = true;
+            runBtn.classList.add('opacity-50');
+            status.innerHTML = '<span class="w-2 h-2 rounded-full bg-blue-500 animate-spin"></span> Executing...';
+            
+            try {
+                // House keeping
+                await pyInstance.runPythonAsync(`sys.stdout.truncate(0); sys.stdout.seek(0); sys.stderr.truncate(0); sys.stderr.seek(0)`);
+                
+                // Execute code with async support
+                await pyInstance.runPythonAsync(code);
+                
+                const stdout = pyInstance.runPython("sys.stdout.getvalue()");
+                const stderr = pyInstance.runPython("sys.stderr.getvalue()");
+                
+                output.innerText = stdout + stderr || "Muvaffaqiyatli bajarildi (Natija yo'q)";
+            } catch (err) {
+                output.innerHTML = `<span class="text-red-500 font-bold">Xatolik yuz berdi:</span>\n${err.message}`;
+            } finally {
+                isRunning = false;
+                runBtn.disabled = false;
+                runBtn.classList.remove('opacity-50');
+                status.innerHTML = '<span class="w-2 h-2 rounded-full bg-green-500"></span> Engine Ready';
+            }
+        }
+
+        function stopIDE() {
+            // Because infinite loops freeze the main thread, 
+            // the only way to recover in this architecture is to reload the lab
+            if(confirm("Dasturni to'xtatish uchun laboratoriyani qayta yuklash kerak. Davom etamizmi?")) {
+                location.reload();
+            }
+        }
+
+        function clearIDE() { editor.setValue(""); document.getElementById('ide-output').innerText = ">>> Tozalandi."; }
+        function closeIDE() { document.getElementById('ide-overlay').classList.add('hidden'); }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.shiftKey && e.key === 'P') { e.preventDefault(); openIDE(); }
+            if (e.key === 'F5' && !document.getElementById('ide-overlay').classList.contains('hidden')) { e.preventDefault(); runIDECode(); }
+            if (e.key === 'Escape' && !document.getElementById('ide-overlay').classList.contains('hidden')) { closeIDE(); }
+        });
+    </script>
+</body>
+</html>
