@@ -39,14 +39,12 @@ def markdownify(value):
     # 3. Sanitize HTML
     allowed_tags = bleach.sanitizer.ALLOWED_TAGS | {
         'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'br', 'hr', 'pre', 'code',
-        'img', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'div', 'span', 'blockquote', 'iframe'
+        'img', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'div', 'span', 'blockquote', 'iframe',
+        'mark', 'u', 'kbd', 'sub', 'sup', 'details', 'summary'
     }
     allowed_attrs = bleach.sanitizer.ALLOWED_ATTRIBUTES | {
+        '*': ['class'],
         'img': ['src', 'alt', 'title', 'class', 'style'],
-        'pre': ['class'],
-        'code': ['class'],
-        'div': ['class'],
-        'span': ['class'],
         'iframe': ['src', 'class', 'frameborder', 'allow', 'allowfullscreen', 'width', 'height', 'style', 'referrerpolicy'],
     }
     

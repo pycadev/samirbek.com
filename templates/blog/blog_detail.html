@@ -18,26 +18,16 @@
     .prose blockquote { @apply border-l-4 border-blue-500 pl-6 italic my-8 text-xl text-gray-600 dark:text-gray-400; }
 </style>
 
-{% if "python" in post.content|lower or "code" in post.content|lower %}
-<!-- Python Sandbox (Pyodide) -->
-<script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+
+{% if "graph " in post.content or "mermaid" in post.content %}
+<!-- Mermaid.js for Diagrams (Senior Feature) -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <script>
-    async function runPython(codeId, outputId) {
-        const output = document.getElementById(outputId);
-        const code = document.getElementById(codeId).innerText;
-        output.innerText = "Yuklanmoqda...";
-        
-        try {
-            let pyodide = await window.loadPyodide();
-            let result = await pyodide.runPythonAsync(code);
-            output.innerText = result || "Muvaffaqiyatli bajarildi (Natija yo'q)";
-            output.classList.add('text-green-500');
-        } catch (err) {
-            output.innerText = "Xato: " + err;
-            output.classList.add('text-red-500');
-        }
-    }
+    mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
 </script>
+<style>
+    .mermaid { @apply flex justify-center my-10 bg-white dark:bg-gray-900 p-6 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm; }
+</style>
 {% endif %}
 {% endblock %}
 
@@ -45,12 +35,17 @@
 <article class="max-w-3xl mx-auto py-12">
     <header class="mb-10 text-center">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-3">
-        <div class="flex items-center space-x-2 text-blue-500 font-bold uppercase tracking-widest text-[11px]">
+        <div class="flex items-center space-x-2 text-blue-500 font-bold uppercase tracking-widest text-[11px] flex-wrap justify-center">
             <span>{{ post.category.name }}</span>
             <span class="text-gray-300">•</span>
             <span class="text-gray-500 font-medium">{{ post.created_at|date:"F d, Y" }}</span>
+            <span class="text-gray-300 hidden sm:inline">•</span>
+            <span class="text-gray-500 font-medium flex items-center gap-1">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                {{ post.read_time }} daqiqa o'qish
+            </span>
         </div>
-        {% if user.is_staff or user.is_superuser %}
+        {% if request.user.is_superuser %}
         <a href="{% url 'blog:post_update' post.slug %}" class="text-gray-400 hover:text-blue-500 transition-colors flex items-center gap-1 text-[12px] font-semibold">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
             Tahrirlash
@@ -113,5 +108,195 @@
         </a>
         {% endif %}
     </div>
+
+    <!-- Table of Contents (Floating Senior UX) -->
+    <div class="hidden xl:block fixed top-32 right-[8%] w-64 opacity-0 transition-opacity duration-500" id="toc-container">
+        <div class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path></svg>
+            Mundarija
+        </div>
+        <nav id="toc" class="space-y-3 border-l-2 border-gray-100 dark:border-gray-800 pl-4 py-2 max-h-[70vh] overflow-y-auto pr-2 custom-scrollbar">
+            <!-- JS dynamically populates this -->
+        </nav>
+    </div>
+
 </article>
+
+<!-- Core Syntax Highlighting Engine (Bulletproof Replacement for Regex) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark-dimmed.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+
+<style>
+    /* Override HLJS background to fit the Mac Terminal transparently */
+    pre.hljs, code.hljs { background: transparent !important; }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // MacOS Terminal Wrapper for Code Blocks (Senior Feature)
+        document.querySelectorAll('.prose pre').forEach((pre, index) => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'bg-gray-900 rounded-2xl shadow-2xl text-left border border-gray-800 my-8 overflow-hidden group transition-all duration-300 hover:shadow-blue-900/20';
+            
+            // Top Mac Window Bar
+            const header = document.createElement('div');
+            header.className = 'flex items-center justify-between px-4 py-3 border-b border-gray-800 bg-[#1c1c1e]';
+            
+            const dotsNode = document.createElement('div');
+            dotsNode.className = 'flex items-center gap-2';
+            dotsNode.innerHTML = `
+                <div class="w-3 h-3 rounded-full bg-[#ff5f56] border border-[#e0443e]"></div>
+                <div class="w-3 h-3 rounded-full bg-[#ffbd2e] border border-[#dea123]"></div>
+                <div class="w-3 h-3 rounded-full bg-[#27c93f] border border-[#1aab29]"></div>
+                <span class="text-gray-500 text-[10px] ml-2 font-mono uppercase tracking-widest font-bold">Terminal_Snippet_${index + 1}.sh</span>
+            `;
+            
+            // Action Buttons
+            const actions = document.createElement('div');
+            actions.className = 'flex items-center gap-2';
+            
+            // Console Output Container (Hidden initially)
+            const consoleOutput = document.createElement('div');
+            consoleOutput.className = 'hidden bg-[#0a0a0a] text-green-400 px-5 py-4 font-mono text-[13px] border-t border-gray-800 leading-relaxed whitespace-pre-wrap max-h-[400px] overflow-y-auto custom-scrollbar';
+
+            // Run Button (Ultra Senior Feature)
+            const runBtn = document.createElement('button');
+            runBtn.className = 'text-green-400 hover:text-white transition-colors opacity-0 group-hover:opacity-100 p-1 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider bg-green-500/10 hover:bg-green-500/30 border border-green-500/20 px-3 py-1 rounded-lg shadow-[0_0_10px_rgba(34,197,94,0.1)]';
+            runBtn.innerHTML = '<svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg> Run';
+            
+            runBtn.onclick = async () => {
+                if (window.isRunning) return;
+                consoleOutput.classList.remove('hidden');
+                consoleOutput.innerHTML = '<span class="text-blue-500 font-bold animate-pulse">>>> Starting WebAssembly Engine (Pyodide)...</span>';
+                
+                try {
+                    if (!window.pyInstance) {
+                        await window.initPyodide();
+                    }
+                    consoleOutput.innerHTML = '<span class="text-yellow-500 font-bold">>>> Executing Code...</span>\n';
+                    
+                    window.isRunning = true;
+                    runBtn.disabled = true;
+                    runBtn.innerHTML = '<span class="animate-spin w-3 h-3 border border-white/30 border-t-white rounded-full"></span> Running...';
+                    
+                    await window.pyInstance.runPythonAsync(`import sys; sys.stdout.truncate(0); sys.stdout.seek(0); sys.stderr.truncate(0); sys.stderr.seek(0)`);
+                    await window.pyInstance.runPythonAsync(pre.innerText);
+                    
+                    const stdout = window.pyInstance.runPython("sys.stdout.getvalue()");
+                    const stderr = window.pyInstance.runPython("sys.stderr.getvalue()");
+                    
+                    let finalOut = '<span class="text-gray-500 select-none">>>> Output:</span>\n';
+                    if (stdout) finalOut += stdout;
+                    if (stderr) finalOut += `<span class="text-red-500">${stderr}</span>`;
+                    if (!stdout && !stderr) finalOut += '<span class="text-gray-500 italic">Muvaffaqiyatli bajarildi (Natija yo\'q)</span>';
+                    
+                    consoleOutput.innerHTML = finalOut;
+                } catch (err) {
+                    consoleOutput.innerHTML = `<span class="text-red-500 font-bold">>>> Runtime Error:</span>\n${err.message}`;
+                } finally {
+                    window.isRunning = false;
+                    runBtn.disabled = false;
+                    runBtn.innerHTML = '<svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg> Re-Run';
+                }
+            };
+
+            // Copy Button
+            const copyBtn = document.createElement('button');
+            copyBtn.className = 'text-gray-400 hover:text-white transition-colors opacity-0 group-hover:opacity-100 p-1 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider bg-gray-800/80 hover:bg-gray-700 px-3 py-1 rounded-lg';
+            copyBtn.innerHTML = '<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg> Copy';
+            copyBtn.onclick = () => {
+                navigator.clipboard.writeText(pre.innerText);
+                copyBtn.innerHTML = '<svg class="w-3 h-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Copied!';
+                copyBtn.classList.add('text-green-400');
+                setTimeout(() => {
+                    copyBtn.innerHTML = '<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg> Copy';
+                    copyBtn.classList.remove('text-green-400');
+                }, 2000);
+            };
+            
+            header.appendChild(dotsNode);
+            actions.appendChild(copyBtn);
+            // Check if likely Python to show Run button (or just show everywhere)
+            const codeTag = pre.querySelector('code');
+            const isPython = !codeTag || (codeTag.className.includes('python') || codeTag.className === '' || codeTag.className.includes('language-py'));
+            if(isPython) {
+                actions.appendChild(runBtn);
+            }
+            header.appendChild(actions);
+            
+            // Code Content
+            const content = document.createElement('div');
+            content.className = 'p-5 overflow-x-auto custom-scrollbar font-mono text-[13px] text-gray-300 leading-relaxed bg-[#0d0d0d]';
+            
+            // Move <pre> original content to new container
+            pre.parentNode.insertBefore(wrapper, pre);
+            wrapper.appendChild(header);
+            
+            // For better look, extract innerHTML of pre, remove generic styles
+            pre.style.backgroundColor = 'transparent';
+            pre.style.margin = '0';
+            pre.style.padding = '0';
+            pre.style.color = '#e2e8f0'; // text-gray-200
+            pre.style.fontFamily = "'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace";
+            
+            // Optional syntax highlighting using highlight.js
+            content.appendChild(pre);
+            wrapper.appendChild(content);
+            
+            // Append Output Terminal
+            wrapper.appendChild(consoleOutput);
+
+            if (window.hljs) {
+                // Determine language based on class added by markdown (like class="language-python")
+                // but highlightElement works automatically.
+                hljs.highlightElement(pre);
+            }
+        });
+        
+        const article = document.querySelector('.prose');
+        if (!article) return;
+        
+        const headings = article.querySelectorAll('h2, h3');
+        const tocContainer = document.getElementById('toc-container');
+        const toc = document.getElementById('toc');
+        
+        if (headings.length < 2) {
+            return; // Not enough headings to show TOC
+        }
+        
+        let html = '';
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    document.querySelectorAll('#toc a').forEach(a => {
+                        a.classList.remove('text-blue-500', 'font-bold');
+                        a.classList.add('text-gray-500');
+                    });
+                    const activeLink = document.querySelector(`#toc a[href="#${entry.target.id}"]`);
+                    if (activeLink) {
+                        activeLink.classList.remove('text-gray-500');
+                        activeLink.classList.add('text-blue-500', 'font-bold');
+                    }
+                }
+            });
+        }, { rootMargin: '-20% 0px -80% 0px' }); // Trigger when heading enters top 20%
+        
+        headings.forEach((h, index) => {
+            if (!h.id) {
+                // Generate safe ID
+                h.id = h.innerText.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || ('heading-' + index);
+            }
+            observer.observe(h);
+            
+            const isSub = h.tagName === 'H3';
+            const padding = isSub ? 'pl-4' : '';
+            const fontSize = isSub ? 'text-[12px]' : 'text-[13px] font-medium';
+            html += `<a href="#${h.id}" class="block ${padding} ${fontSize} text-gray-500 hover:text-blue-500 transition-colors line-clamp-2">${h.innerText}</a>`;
+        });
+        
+        toc.innerHTML = html;
+        tocContainer.classList.remove('opacity-0');
+    });
+</script>
 {% endblock %}

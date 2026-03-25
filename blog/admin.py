@@ -17,6 +17,12 @@ class PostAdmin(MarkdownxModelAdmin):
     search_fields = ('title', 'summary', 'content')
     prepopulated_fields = {'slug': ('title',)}
     filter_horizontal = ('tags',)
+    
+    # Senior Backup Button Integration
+    def changelist_view(self, request, extra_context=None):
+        extra_context = extra_context or {}
+        extra_context['backup_url'] = '/api/lab/backup/'
+        return super().changelist_view(request, extra_context=extra_context)
 
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):

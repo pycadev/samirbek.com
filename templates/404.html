@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}404 - Sahifa topilmadi | Samirbek{% endblock %}
+
+{% block content %}
+<div class="min-h-[70vh] flex items-center justify-center py-20 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-max mx-auto text-center">
+        <main class="sm:flex">
+            <p class="text-6xl sm:text-7xl font-black bg-gradient-to-br from-blue-600 to-purple-600 bg-clip-text text-transparent transform sm:-rotate-90 sm:mt-16 sm:mr-8 drop-shadow-xl pt-4 sm:pt-0">404</p>
+            <div class="sm:ml-6 mt-8 sm:mt-0 text-left">
+                <div class="sm:border-l sm:border-gray-200 dark:sm:border-gray-800 sm:pl-8">
+                    <h1 class="text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight sm:text-5xl">
+                        Sahifa topilmadi
+                    </h1>
+                    <p class="mt-4 text-base text-gray-500 dark:text-gray-400 font-medium">
+                        Kechirasiz, siz qidirayotgan sahifa mavjud emas, uning nomi o'zgargan yoki vaqtincha o'chirilgan bo'lishi mumkin.
+                    </p>
+                    <div class="mt-8 flex items-center gap-4">
+                        <a href="{% url 'blog:home' %}" class="inline-flex items-center px-6 py-3 border border-transparent text-sm font-bold rounded-2xl shadow-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none transition-all hover:scale-105 active:scale-95 shadow-blue-500/30">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                            Bosh sahifaga qaytish
+                        </a>
+                        <a href="javascript:history.back()" class="inline-flex items-center px-6 py-3 border border-gray-200 dark:border-gray-800 text-sm font-bold rounded-2xl text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none transition-colors">
+                            Orqaga
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <!-- Terminal Decorator (Senior Detail) -->
+        <div class="mt-20 max-w-xl mx-auto">
+            <div class="bg-gray-900 rounded-2xl p-4 shadow-2xl text-left border border-gray-800">
+                <div class="flex items-center gap-2 mb-4">
+                    <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                    <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                    <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                    <span class="text-gray-500 text-[10px] ml-2 font-mono uppercase tracking-widest">system_log.py</span>
+                </div>
+                <div class="font-mono text-sm">
+                    <span class="text-green-400">samirbek@server:~$</span> <span class="text-white">ping url "{{ request.path }}"</span><br>
+                    <span class="text-red-400">Error 404:</span> <span class="text-gray-400">Destination route completely unresolvable. Data packets lost in the void.</span><br>
+                    <span class="text-green-400">samirbek@server:~$</span> <span class="animate-pulse text-white">_</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

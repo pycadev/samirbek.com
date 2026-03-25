@@ -1,0 +1,9 @@
+{% extends "admin/change_list.html" %}
+{% block object-tools-items %}
+    {{ block.super }}
+    <li>
+        <a href="{{ backup_url }}" class="addlink" style="background-color: #10b981; color: white; font-weight: bold;">
+            📥 Download Markdown Backup
+        </a>
+    </li>
+{% endblock %}

@@ -5,7 +5,9 @@ app_name = 'blog'
 
 urlpatterns = [
     path('', views.HomeView.as_view(), name='home'),
+    path('about/', views.AboutView.as_view(), name='about'),
     path('blog/', views.BlogListView.as_view(), name='blog_list'),
+    path('blog/special/', views.SpecialPostListView.as_view(), name='blog_special'),
     path('blog/new/', views.PostCreateView.as_view(), name='post_create'),
     path('blog/<slug:slug>/', views.BlogDetailView.as_view(), name='blog_detail'),
     path('blog/<slug:slug>/edit/', views.PostUpdateView.as_view(), name='post_update'),
@@ -13,5 +15,10 @@ urlpatterns = [
     path('api/search/', views.search_api, name='search_api'),
     path('api/lab/input/request/', views.lab_input_request, name='lab_input_request'),
     path('api/lab/input/provide/', views.lab_input_provide, name='lab_input_provide'),
+    path('api/lab/backup/', views.download_markdown_backup, name='markdown_backup'),
+    path('api/lab/snippet/save/', views.save_snippet, name='save_snippet'),
+    path('lab/<str:snippet_id>/', views.lab_shared_view, name='lab_shared_view'),
+    path('cloud/', views.cloud_terminal_view, name='cloud_terminal'),
+    path('api/cloud/execute/', views.cloud_execute_command, name='cloud_execute'),
     path('stackframe.js', views.stackframe_root),
 ]

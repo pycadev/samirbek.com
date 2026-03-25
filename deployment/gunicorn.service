@@ -1,0 +1,16 @@
+[Unit]
+Description=gunicorn daemon for samirbek blog
+After=network.target
+
+[Service]
+User=samirbek
+Group=www-data
+WorkingDirectory=/home/samirbek/sarim
+ExecStart=/home/samirbek/sarim/venv/bin/gunicorn \
+          --access-log-file - \
+          --workers 3 \
+          --bind unix:/run/gunicorn.sock \
+          config.wsgi:application
+
+[Install]
+WantedBy=multi-user.target
